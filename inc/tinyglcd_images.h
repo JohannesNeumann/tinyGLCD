@@ -1,6 +1,9 @@
 #ifndef IMAGES_H_
 #define IMAGES_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 
@@ -64,40 +67,9 @@ typedef struct {
 	/* An array of image data (like in image_t) for each individual image. */
 	const uint8_t** pixeldata;
 } multiImage_t;
-
-
-// the following part is auto-generated. Do not edit.
-// START__
-extern const image_t Copy;
-extern const image_t Cut;
-extern const image_t Document;
-extern const image_t FaderSymbol;
-extern const image_t Folder;
-extern const image_t New;
-extern const image_t PlayMedium;
-extern const image_t PlaySmall;
-extern const image_t RecMedium;
-extern const image_t RecSmall;
-extern const image_t Save;
-extern const image_t SaveAs;
-extern const image_t ScrollBarBG;
-extern const image_t SeqPageSel;
-extern const image_t SeqPageUnSel;
-extern const image_t StopMedium;
-extern const image_t StopSmall;
-extern const image_t baseBackground;
-extern const image_t basicBackground;
-extern const image_t grooveBackgroundCustom;
-extern const image_t grooveBackgroundMaster;
-extern const multiImage_t knob;
-extern const multiImage_t knobTruncated;
-extern const image_t microTimingBackground;
-extern const multiImage_t onOffSwitch;
-extern const image_t parameterSetupBackground;
-extern const image_t scaleBackground;
-extern const image_t tempoBackground;
-extern const image_t textEditorBackground;
-extern const image_t trackSetupBackground;
-// END__
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

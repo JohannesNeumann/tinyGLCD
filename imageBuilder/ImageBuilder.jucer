@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="X51DEm" name="ImageBuilder" projectType="consoleapp" version="1.0.0"
+              bundleIdentifier="com.yourcompany.ImageBuilder" includeBinaryInAppConfig="1"
+              jucerVersion="4.2.3">
+  <MAINGROUP id="X6VXGh" name="ImageBuilder">
+    <GROUP id="{9DA9D0F5-D8B4-BE93-0CD2-0377E94885B9}" name="Source">
+      <FILE id="jjFPA0" name="PMultiImage.cpp" compile="1" resource="0" file="Source/PMultiImage.cpp"/>
+      <FILE id="nwdboj" name="PMultiImage.h" compile="0" resource="0" file="Source/PMultiImage.h"/>
+      <FILE id="FfqaA7" name="PFont.cpp" compile="1" resource="0" file="Source/PFont.cpp"/>
+      <FILE id="fYeoG2" name="PFont.h" compile="0" resource="0" file="Source/PFont.h"/>
+      <FILE id="pUc7gu" name="errorlog.cpp" compile="1" resource="0" file="Source/errorlog.cpp"/>
+      <FILE id="Ro3ePI" name="errorlog.h" compile="0" resource="0" file="Source/errorlog.h"/>
+      <FILE id="WIu5FH" name="Parser.cpp" compile="1" resource="0" file="Source/Parser.cpp"/>
+      <FILE id="DJPUn4" name="Parser.h" compile="0" resource="0" file="Source/Parser.h"/>
+      <FILE id="Q1CSHK" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <VS2010 targetFolder="Builds/VisualStudio2010">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="ImageBuilder"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="2" targetName="ImageBuilder"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../../../../Programmierung/Juce/modules"/>
+      </MODULEPATHS>
+    </VS2010>
+    <VS2012 targetFolder="Builds/VisualStudio2012">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="ImageBuilder"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="2" targetName="ImageBuilder"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_graphics" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../../../../Programmierung/Juce/modules"/>
+      </MODULEPATHS>
+    </VS2012>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       isDebug="1" optimisation="1" targetName="ImageBuilder"/>
+        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       isDebug="0" optimisation="2" targetName="ImageBuilder"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_graphics" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../../../../Programmierung/Juce/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <LINUX_MAKE targetFolder="Builds/Linux">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
+                       targetName="ImageBuilder"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="2"
+                       targetName="ImageBuilder"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_graphics" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../../../../Programmierung/Juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../../../../Programmierung/Juce/modules"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULES id="juce_core" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_data_structures" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_events" showAllCode="1" useLocalCopy="1"/>
+    <MODULES id="juce_graphics" showAllCode="1" useLocalCopy="1"/>
+  </MODULES>
+  <JUCEOPTIONS/>
+</JUCERPROJECT>
