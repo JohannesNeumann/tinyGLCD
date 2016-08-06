@@ -78,6 +78,11 @@ void tglcd_init()
     currentSendBuffer = bufferB;
 }
 
+void tglcd_clearDrawBuffer()
+{
+    tglcd_clearBuffer(currentDrawBuffer);
+}
+
 void tglcd_loadWholeScreenFromBuffer(const uint8_t* pixeldata)
 {
 	memcpy(currentDrawBuffer, pixeldata, TINYGLCD_BUFFER_SIZE);
@@ -321,14 +326,19 @@ void tglcd_clearToWhite(int xPos, int yPos, int width, int height)
 	{
 		height = TINYGLCD_SCREEN_HEIGHT - 1 - yPos;
 	}
-
+    
+    if (width + xPos >= TINYGLCD_SCREEN_WIDTH)
+    {
+        width = TINYGLCD_SCREEN_WIDTH - 1 - xPos;
+    }
+    
 	int firstByte = ( yPos + 7 ) >> 3;
 	int lastByte = ( yPos + height + 7 ) >> 3;
 
 	uint8_t mask = ~(0xFF << (yPos - (firstByte << 3)));
 	for ( int x = xPos; x < xPos + width; x++ )
 	{
-	    currentDrawBuffer[yPos * TINYGLCD_SCREEN_WIDTH + x] &= (uint8_t) mask;
+	    currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] &= (uint8_t) mask;
 	}
 
 	for ( int hbyte = firstByte + 1; hbyte < lastByte - 1; hbyte++ )
@@ -345,7 +355,7 @@ void tglcd_clearToWhite(int xPos, int yPos, int width, int height)
 	mask = ~(0xFF >> ((lastByte << 3) - (yPos + height)));
 	for ( int x = xPos; x < xPos + width; x++ )
 	{
-	    currentDrawBuffer[yPos * TINYGLCD_SCREEN_WIDTH + x] &= (uint8_t) mask;
+	    currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + x] &= (uint8_t) mask;
 	}
 }
 
