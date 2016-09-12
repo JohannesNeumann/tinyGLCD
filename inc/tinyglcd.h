@@ -30,6 +30,7 @@ extern "C" {
     // draws multiple lines of text. Line breaks are done on the \n character. if lineHeight == 0, the default height of the
     // font is used.
     void tglcd_drawMultiLineTextOR(int x, int y, int width, const font_t* font, const char* text, int clipToY, int lineHeight);
+    void tglcd_drawMultiLineTextXOR(int x, int y, int width, const font_t* font, const char* text, int clipToY, int lineHeight);
     
     void tglcd_drawImageOR(int x, int y, const image_t* image, int clipToX, int clipToY);
     void tglcd_drawImageXOR(int x, int y, const image_t* image, int clipToX, int clipToY);
