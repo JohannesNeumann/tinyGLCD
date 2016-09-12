@@ -78,7 +78,7 @@ void tglcd_init()
     currentSendBuffer = bufferB;
 }
 
-void tglcd_clearDrawBuffer()
+void tglcd_clearScreen()
 {
     tglcd_clearBuffer(currentDrawBuffer);
 }
@@ -283,6 +283,118 @@ void tglcd_drawTextRightAlignedXOR(int right, int y, const font_t* font, const c
 		x += ch->width;
 		text++;
 	}
+}
+
+void tglcd_drawMultiLineTextOR(int x, int y, int width, const font_t* font, const char* text, int clipToY, int lineHeight)
+{
+    int realLineHeight = (lineHeight == 0)?font->height + 2:lineHeight;
+    int currentY = y;
+    if (currentY > clipToY)
+        return;
+    int currentX = 0;
+    int currentLine = 0;
+    const char* unwrittenText = text;
+    
+    while (*unwrittenText)
+    {
+        // find next space symbol (or the end of the text)
+        const char* wordStart = unwrittenText;
+        int textWidth = 0;
+        while (*unwrittenText != ' ' && *unwrittenText != '\n' && *unwrittenText)
+        {
+            const character_t* ch = font->chars[*unwrittenText & 0x7F];
+            textWidth += ch->width;
+            unwrittenText++;
+        }
+        
+        // will the end of the next word be off the screen?
+        if ((currentX + textWidth > width) || (*unwrittenText == '\n'))
+        {
+            currentLine++;
+            currentX = 0;
+            currentY += realLineHeight;
+            if (currentY > clipToY)
+                break;
+        }
+        
+        // draw the word
+        const char* i = wordStart;
+        while (i != unwrittenText)
+        {
+            const character_t* ch = font->chars[*i & 0x7F];
+            tglcd_drawPixelbufferOR(x + currentX, currentY, ch->pixeldata, ch->width, font->height, font->byteHeight, TINYGLCD_SCREEN_WIDTH, clipToY);
+            currentX += ch->width;
+            i++;
+        }
+        
+        // add a space symbol
+        if (*unwrittenText == ' ')
+        {
+            const character_t* ch = font->chars[*unwrittenText & 0x7F];
+            tglcd_drawPixelbufferOR(x + currentX, currentY, ch->pixeldata, ch->width, font->height, font->byteHeight, TINYGLCD_SCREEN_WIDTH, clipToY);
+            currentX += ch->width;
+            unwrittenText++;
+        }
+        // skip the newline symbol
+        else if (*unwrittenText == '\n')
+            unwrittenText++;
+    }
+}
+
+void tglcd_drawMultiLineTextXOR(int x, int y, int width, const font_t* font, const char* text, int clipToY, int lineHeight)
+{
+    int realLineHeight = (lineHeight == 0)?font->height + 2:lineHeight;
+    int currentY = y;
+    if (currentY > clipToY)
+        return;
+    int currentX = 0;
+    int currentLine = 0;
+    const char* unwrittenText = text;
+    
+    while (*unwrittenText)
+    {
+        // find next space symbol (or the end of the text)
+        const char* wordStart = unwrittenText;
+        int textWidth = 0;
+        while (*unwrittenText != ' ' && *unwrittenText != '\n' && *unwrittenText)
+        {
+            const character_t* ch = font->chars[*unwrittenText & 0x7F];
+            textWidth += ch->width;
+            unwrittenText++;
+        }
+        
+        // will the end of the next word be off the screen?
+        if ((currentX + textWidth > width) || (*unwrittenText == '\n'))
+        {
+            currentLine++;
+            currentX = 0;
+            currentY += realLineHeight;
+            if (currentY > clipToY)
+                break;
+        }
+        
+        // draw the word
+        const char* i = wordStart;
+        while (i != unwrittenText)
+        {
+            const character_t* ch = font->chars[*i & 0x7F];
+            tglcd_drawPixelbufferXOR(x + currentX, currentY, ch->pixeldata, ch->width, font->height, font->byteHeight, TINYGLCD_SCREEN_WIDTH, clipToY);
+            currentX += ch->width;
+            i++;
+        }
+        
+        // add a space symbol
+        if (*unwrittenText == ' ')
+        {
+            const character_t* ch = font->chars[*unwrittenText & 0x7F];
+            tglcd_drawPixelbufferXOR(x + currentX, currentY, ch->pixeldata, ch->width, font->height, font->byteHeight, TINYGLCD_SCREEN_WIDTH, clipToY);
+            currentX += ch->width;
+            unwrittenText++;
+        }
+        // skip the newline symbol
+        else if (*unwrittenText == '\n')
+            unwrittenText++;
+    }
 }
 
 void tglcd_drawImageOR(int x, int y, const image_t* image, int clipToX, int clipToY)

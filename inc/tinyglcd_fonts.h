@@ -45,7 +45,7 @@ typedef struct {
 	 *
 	 * The width of the character defines the number of bytes in each row,
 	 * ceil(height/8) defines the number of bytes per column.
-	 * The bytes a..z f the above figure are arranged in the format
+	 * The bytes a..z in the above figure are arranged in the format
 	 * {a, b, c, ... , n, o, p, ... , t, u, v, ... , z}
 	 *
 	 * An image with size (width = 4, height = 9) will thus have 8 bytes
