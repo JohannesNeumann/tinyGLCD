@@ -42,8 +42,14 @@ extern "C" {
     
     void tglcd_drawBoxWithBorder(int x, int y, int width, int height);
     
-    void tglcd_drawScrollBar(int x, int totalContentSize, int contentSizeVisible, int position);
-    void tglcd_drawScrollBarIfNeeded(int x, int totalContentSize, int contentSizeVisible, int position);
+    void tglcd_drawDottedVerticalLineOR(int x, int y, int height);
+    void tglcd_drawDottedHorizontalLineOR(int x, int y, int width);
+    void tglcd_drawVerticalLineOR(int x, int y, int height);
+    void tglcd_drawHorizontalLineOR(int x, int y, int width);
+    void tglcd_drawDottedVerticalLineXOR(int x, int y, int height);
+    void tglcd_drawDottedHorizontalLineXOR(int x, int y, int width);
+    void tglcd_drawVerticalLineXOR(int x, int y, int height);
+    void tglcd_drawHorizontalLineXOR(int x, int y, int width);
     
     // draws an integer
     void tglcd_drawIntOR(int x, int y, const font_t* font, int value, int alwaysIncludeSign, int clipToX, int clipToY);
@@ -68,13 +74,7 @@ extern "C" {
  */
 class TGLCDPainter
 {
-public:    
-    typedef enum
-    {
-        _or,
-        _xor
-    } glcdStyle_t;
-    
+public:       
     void setPixel(int x, int y, bool shouldBeBlack)
     {
         tglcd_setPixel(x, y, shouldBeBlack);
@@ -267,15 +267,46 @@ public:
         tglcd_drawIntRightAlignedXOR(right, y, font, value, alwaysIncludeSign?1:0);
     }
     
-    void drawScrollBar(int x, int totalContentSize, int contentSizeVisible, int position)
+    void drawDottedVerticalLineOR(int x, int y, int height)
     {
-        tglcd_drawScrollBar(x, totalContentSize, contentSizeVisible, position);
+        tglcd_drawDottedVerticalLineOR(x, y, height);
     }
     
-    void drawScrollBarIfNeeded(int x, int totalContentSize, int contentSizeVisible, int position)
+    void drawDottedHorizontalLineOR(int x, int y, int width)
     {
-        tglcd_drawScrollBarIfNeeded(x, totalContentSize, contentSizeVisible, position);
+        tglcd_drawDottedHorizontalLineOR(x, y, width);
     }
+    
+    void drawVerticalLineOR(int x, int y, int height)
+    {
+        tglcd_drawVerticalLineOR(x, y, height);
+    }
+    
+    void drawHorizontalLineOR(int x, int y, int width)
+    {
+        tglcd_drawHorizontalLineOR(x, y, width);
+    }
+    
+    void drawDottedVerticalLineXOR(int x, int y, int height)
+    {
+        tglcd_drawDottedVerticalLineXOR(x, y, height);
+    }
+    
+    void drawDottedHorizontalLineXOR(int x, int y, int width)
+    {
+        tglcd_drawDottedHorizontalLineXOR(x, y, width);
+    }
+    
+    void drawVerticalLineXOR(int x, int y, int height)
+    {
+        tglcd_drawVerticalLineXOR(x, y, height);
+    }
+    
+    void drawHorizontalLineXOR(int x, int y, int width)
+    {
+        tglcd_drawHorizontalLineXOR(x, y, width);
+    }
+    
     
 };
 

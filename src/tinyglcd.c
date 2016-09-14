@@ -112,13 +112,14 @@ void tglcd_drawPixelbufferXOR(int xPos, int yPos, const uint8_t* pxbuffer, int w
 	int startPage = yPos / 8;
 	int yBit = yPos - startPage*8;
 
-	if (yPos + height >= clipToY)
+	/*if (yPos + height >= clipToY)
 	{
 		height = clipToY - yPos;
-	}
+	}*/
 
 	for (int x = 0; x < width; x++)
 	{
+        /* take care of clipping in the x direction */
 		if (x + xPos >= clipToX)
 			break;
 		if (x + xPos < 0)
@@ -126,15 +127,37 @@ void tglcd_drawPixelbufferXOR(int xPos, int yPos, const uint8_t* pxbuffer, int w
 
 		for (int yByte = 0; yByte < byteHeight; yByte++)
 		{
-			if (yByte + startPage >= 8)
-				break;
-
-			currentDrawBuffer[(yByte + startPage)*TINYGLCD_SCREEN_WIDTH + x + xPos] ^= (uint8_t) pxbuffer[yByte*width + x] << yBit;
-			if ((yBit != 0) && (yByte + 1 + startPage < 8))
-			{
-				currentDrawBuffer[(yByte + 1 + startPage)*TINYGLCD_SCREEN_WIDTH + x + xPos] ^= (uint8_t) pxbuffer[yByte*width + x] >> (8 - yBit);
-			}
-		}
+            /* take care of clipping in the y direction */
+            int clipByte = clipToY / 8;
+            int clipBit = clipToY - clipByte * 8;
+            
+            /* everything after this will be clipped away */
+            if (startPage + yByte > clipByte)
+                break;
+            
+            if (clipByte == yByte + startPage)
+            {
+                uint8_t mask = 0xFF >> ( 8 - clipBit );
+                currentDrawBuffer[(yByte + startPage)*TINYGLCD_SCREEN_WIDTH + x + xPos] ^= ((uint8_t) pxbuffer[yByte*width + x] << yBit) & mask;
+            }
+            else if (clipByte == yByte + startPage + 1)
+            {
+                currentDrawBuffer[(yByte + startPage)*TINYGLCD_SCREEN_WIDTH + x + xPos] ^= (uint8_t) pxbuffer[yByte*width + x] << yBit;
+                if ((yBit != 0) && (yByte + 1 + startPage < 8))
+                {
+                    uint8_t mask = 0xFF >> ( 8 - clipBit );
+                    currentDrawBuffer[(yByte + 1 + startPage)*TINYGLCD_SCREEN_WIDTH + x + xPos] ^= ((uint8_t) pxbuffer[yByte*width + x] >> (8 - yBit)) & mask;
+                }
+            }
+            else
+            {
+                currentDrawBuffer[(yByte + startPage)*TINYGLCD_SCREEN_WIDTH + x + xPos] ^= (uint8_t) pxbuffer[yByte*width + x] << yBit;
+                if ((yBit != 0) && (yByte + 1 + startPage < 8))
+                {
+                    currentDrawBuffer[(yByte + 1 + startPage)*TINYGLCD_SCREEN_WIDTH + x + xPos] ^= (uint8_t) pxbuffer[yByte*width + x] >> (8 - yBit);
+                }
+            }
+        }
 	}
 }
 
@@ -423,52 +446,61 @@ void tglcd_drawMultiImageXOR(int x, int y, const multiImage_t* image, int index,
 
 void tglcd_clearToWhite(int xPos, int yPos, int width, int height)
 {
-	if (xPos < 0)
-	{
-		width += xPos;
-		xPos = 0;
-	}
-	if (yPos < 0)
-	{
-		height += yPos;
-		yPos = 0;
-	}
-
-	if (height + yPos >= TINYGLCD_SCREEN_HEIGHT)
-	{
-		height = TINYGLCD_SCREEN_HEIGHT - 1 - yPos;
-	}
-    
-    if (width + xPos >= TINYGLCD_SCREEN_WIDTH)
+    if (xPos < 0)
     {
-        width = TINYGLCD_SCREEN_WIDTH - 1 - xPos;
+        width += xPos;
+        xPos = 0;
+    }
+    if (yPos < 0)
+    {
+        height += yPos;
+        yPos = 0;
     }
     
-	int firstByte = ( yPos + 7 ) >> 3;
-	int lastByte = ( yPos + height + 7 ) >> 3;
-
-	uint8_t mask = ~(0xFF << (yPos - (firstByte << 3)));
-	for ( int x = xPos; x < xPos + width; x++ )
-	{
-	    currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] &= (uint8_t) mask;
-	}
-
-	for ( int hbyte = firstByte + 1; hbyte < lastByte - 1; hbyte++ )
-	{
-		int baseIndex = hbyte * TINYGLCD_SCREEN_WIDTH;
-		for ( int x = xPos; x < xPos + width; x++ )
-		{
-			if ( x >= TINYGLCD_SCREEN_WIDTH )
-				break;
-			currentDrawBuffer[baseIndex + x] = 0;
-		}
-	}
-
-	mask = ~(0xFF >> ((lastByte << 3) - (yPos + height)));
-	for ( int x = xPos; x < xPos + width; x++ )
-	{
-	    currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + x] &= (uint8_t) mask;
-	}
+    if (height + yPos > TINYGLCD_SCREEN_HEIGHT)
+    {
+        height = TINYGLCD_SCREEN_HEIGHT - 1 - yPos;
+    }
+    
+    int firstByte = ( yPos ) >> 3;
+    int firstBit = yPos - (firstByte << 3);
+    int lastByte = ( yPos + height ) >> 3;
+    int lastBit = yPos + height - (lastByte << 3);
+    
+    if (firstByte != lastByte)
+    {
+        uint8_t mask = ~(0xFF << firstBit);
+        for ( int x = xPos; x < xPos + width; x++ )
+        {
+            currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] &= (uint8_t) mask;
+        }
+        
+        for ( int hbyte = firstByte + 1; hbyte < lastByte; hbyte++ )
+        {
+            int baseIndex = hbyte * TINYGLCD_SCREEN_WIDTH;
+            for ( int x = xPos; x < xPos + width; x++ )
+            {
+                if ( x >= TINYGLCD_SCREEN_WIDTH )
+                    break;
+                currentDrawBuffer[baseIndex + x] = 0x00;
+            }
+        }
+        
+        mask = ~(0xFF >> (8 - lastBit));
+        for ( int x = xPos; x < xPos + width; x++ )
+        {
+            currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + x] &= (uint8_t) mask;
+        }
+    }
+    else
+    {
+        uint8_t mask = ~(0xFF << firstBit);
+        mask = mask >> (8 - lastBit);
+        for ( int x = xPos; x < xPos + width; x++ )
+        {
+            currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] &= (uint8_t) mask;
+        }
+    }
 }
 
 
@@ -490,60 +522,276 @@ void tglcd_clearToBlack(int xPos, int yPos, int width, int height)
 		height = TINYGLCD_SCREEN_HEIGHT - 1 - yPos;
 	}
 
-	int firstByte = ( yPos + 7 ) >> 3;
-	int lastByte = ( yPos + height + 7 ) >> 3;
+	int firstByte = ( yPos ) >> 3;
+    int firstBit = yPos - (firstByte << 3);
+    int lastByte = ( yPos + height ) >> 3;
+    int lastBit = yPos + height - (lastByte << 3);
 
-	uint8_t mask = 0xFF << (yPos - (firstByte << 3));
-	for ( int x = xPos; x < xPos + width; x++ )
-	{
-	    currentDrawBuffer[yPos * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
-	}
-
-	for ( int hbyte = firstByte + 1; hbyte < lastByte - 1; hbyte++ )
-	{
-		int baseIndex = hbyte * TINYGLCD_SCREEN_WIDTH;
-		for ( int x = xPos; x < xPos + width; x++ )
-		{
-			if ( x >= TINYGLCD_SCREEN_WIDTH )
-				break;
-			currentDrawBuffer[baseIndex + x] = 0xFF;
-		}
-	}
-
-	mask = 0xFF >> ((lastByte << 3) - (yPos + height));
-	for ( int x = xPos; x < xPos + width; x++ )
-	{
-	    currentDrawBuffer[yPos * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
-	}
+    if (firstByte != lastByte)
+    {
+        uint8_t mask = 0xFF << firstBit;
+        for ( int x = xPos; x < xPos + width; x++ )
+        {
+            currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
+        }
+        
+        for ( int hbyte = firstByte + 1; hbyte < lastByte; hbyte++ )
+        {
+            int baseIndex = hbyte * TINYGLCD_SCREEN_WIDTH;
+            for ( int x = xPos; x < xPos + width; x++ )
+            {
+                if ( x >= TINYGLCD_SCREEN_WIDTH )
+                    break;
+                currentDrawBuffer[baseIndex + x] = 0xFF;
+            }
+        }
+        
+        mask = 0xFF >> (8 - lastBit);
+        for ( int x = xPos; x < xPos + width; x++ )
+        {
+            currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
+        }
+    }
+    else
+    {
+        uint8_t mask = 0xFF << firstBit;
+        mask = mask >> (8 - lastBit);
+        for ( int x = xPos; x < xPos + width; x++ )
+        {
+            currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
+        }
+    }
 }
 
-/*void tglcd_drawHorizontalLine(int x1, int x2, int y, glcdStyle_t style)
+void tglcd_drawDottedVerticalLineOR(int x, int y, int height)
 {
-	x1 = (x1 >= 0)?x1:0;
-	x2 = (x2 >= 0)?x2:0;
-	x1 = (x1 < TINYGLCD_SCREEN_WIDTH)?x1:TINYGLCD_SCREEN_WIDTH;
-	x2 = (x2 < TINYGLCD_SCREEN_WIDTH)?x2:TINYGLCD_SCREEN_WIDTH;
+    if (x < 0)
+        return;
+    
+    if (y < 0)
+    {
+        height += y;
+        y = 0;
+    }
+    
+    if (height + y > TINYGLCD_SCREEN_HEIGHT)
+    {
+        height = TINYGLCD_SCREEN_HEIGHT - 1 - y;
+    }
+    
+    int firstByte = y >> 3;
+    int firstBit = y - (firstByte << 3);
+    int lastByte = ( y + height ) >> 3;
+    int lastBit = y + height - (lastByte << 3);
+    
+    // created the dots in the masks
+    uint8_t maskMask = (y & 0x01)?0b10101010:0b01010101;
+    
+    if (firstByte != lastByte)
+    {
+        uint8_t mask = 0xFF << firstBit;
+        mask &= maskMask;
+        currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
+        
+        for ( int hbyte = firstByte + 1; hbyte < lastByte; hbyte++ )
+        {
+            int baseIndex = hbyte * TINYGLCD_SCREEN_WIDTH;
+            currentDrawBuffer[baseIndex + x] = maskMask;
+        }
+        
+        mask = 0xFF >> (8 - lastBit);
+        mask &= maskMask;
+        currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
+    }
+    else
+    {
+        uint8_t mask = 0xFF << firstBit;
+        mask = mask >> (8 - lastBit);
+        mask &= maskMask;
+        currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
+    }
+}
 
-	int byte = ( y + 7 ) >> 3;
-	uint8_t mask = 1 << (y - (byte >> 3));
+void tglcd_drawDottedHorizontalLineOR(int x, int y, int width)
+{
+    int byte = y >> 3;
+    int bit = y - (byte << 3);
+    uint8_t mask = 0x01 << bit;
+    
+    for (int i = x; i < x + width; i+=2)
+        currentDrawBuffer[byte * TINYGLCD_SCREEN_WIDTH + i] |= (uint8_t) mask;
+}
 
-	int increment = (x2 > x1)?1:-1;
-	if (style == or)
-	{
-		for (int x = x1; x != x2; x+=increment)
-		{
-			currentDrawBuffer[0*TINYGLCD_SCREEN_WIDTH + xPos] |= (uint8_t) sideMask;
-		}
-	}
-	else
+void tglcd_drawVerticalLineOR(int x, int y, int height)
+{
+    if (x < 0)
+        return;
+    
+    if (y < 0)
+    {
+        height += y;
+        y = 0;
+    }
+    
+    if (height + y > TINYGLCD_SCREEN_HEIGHT)
+    {
+        height = TINYGLCD_SCREEN_HEIGHT - 1 - y;
+    }
+    
+    int firstByte = ( y ) >> 3;
+    int firstBit = y - (firstByte << 3);
+    int lastByte = ( y + height ) >> 3;
+    int lastBit = y + height - (lastByte << 3);
+    
+    if (firstByte != lastByte)
+    {
+        uint8_t mask = 0xFF << firstBit;
+        currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
+        
+        for ( int hbyte = firstByte + 1; hbyte < lastByte; hbyte++ )
+        {
+            int baseIndex = hbyte * TINYGLCD_SCREEN_WIDTH;
+            currentDrawBuffer[baseIndex + x] = 0xFF;
+        }
+        
+        mask = 0xFF >> (8 - lastBit);
+        currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
+    }
+    else
+    {
+        uint8_t mask = 0xFF << firstBit;
+        mask = mask >> (8 - lastBit);
+        currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] |= (uint8_t) mask;
+    }
+}
 
-}*/
+void tglcd_drawHorizontalLineOR(int x, int y, int width)
+{
+    int byte = y >> 3;
+    int bit = y - (byte << 3);
+    uint8_t mask = 0x01 << bit;
+    
+    for (int i = x; i < x + width; i++)
+        currentDrawBuffer[byte * TINYGLCD_SCREEN_WIDTH + i] |= (uint8_t) mask;
+}
+
+void tglcd_drawDottedVerticalLineXOR(int x, int y, int height)
+{
+    if (x < 0)
+        return;
+    
+    if (y < 0)
+    {
+        height += y;
+        y = 0;
+    }
+    
+    if (height + y > TINYGLCD_SCREEN_HEIGHT)
+    {
+        height = TINYGLCD_SCREEN_HEIGHT - 1 - y;
+    }
+    
+    int firstByte = y >> 3;
+    int firstBit = y - (firstByte << 3);
+    int lastByte = ( y + height ) >> 3;
+    int lastBit = y + height - (lastByte << 3);
+    
+    // created the dots in the masks
+    uint8_t maskMask = (y & 0x01)?0b10101010:0b01010101;
+    
+    if (firstByte != lastByte)
+    {
+        uint8_t mask = 0xFF << firstBit;
+        mask &= maskMask;
+        currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] ^= (uint8_t) mask;
+        
+        for ( int hbyte = firstByte + 1; hbyte < lastByte; hbyte++ )
+        {
+            int baseIndex = hbyte * TINYGLCD_SCREEN_WIDTH;
+            currentDrawBuffer[baseIndex + x] ^= maskMask;
+        }
+        
+        mask = 0xFF >> (8 - lastBit);
+        mask &= maskMask;
+        currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + x] ^= (uint8_t) mask;
+    }
+    else
+    {
+        uint8_t mask = 0xFF << firstBit;
+        mask = mask >> (8 - lastBit);
+        mask &= maskMask;
+        currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] ^= (uint8_t) mask;
+    }
+}
+
+void tglcd_drawDottedHorizontalLineSOR(int x, int y, int width)
+{
+    int byte = y >> 3;
+    int bit = y - (byte << 3);
+    uint8_t mask = 0x01 << bit;
+    
+    for (int i = x; i < x + width; i+=2)
+        currentDrawBuffer[byte * TINYGLCD_SCREEN_WIDTH + i] ^= (uint8_t) mask;
+}
+
+void tglcd_drawVerticalLineXOR(int x, int y, int height)
+{
+    if (x < 0)
+        return;
+    
+    if (y < 0)
+    {
+        height += y;
+        y = 0;
+    }
+    
+    if (height + y > TINYGLCD_SCREEN_HEIGHT)
+    {
+        height = TINYGLCD_SCREEN_HEIGHT - 1 - y;
+    }
+    
+    int firstByte = ( y ) >> 3;
+    int firstBit = y - (firstByte << 3);
+    int lastByte = ( y + height ) >> 3;
+    int lastBit = y + height - (lastByte << 3);
+    
+    if (firstByte != lastByte)
+    {
+        uint8_t mask = 0xFF << firstBit;
+        currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] ^= (uint8_t) mask;
+        
+        for ( int hbyte = firstByte + 1; hbyte < lastByte; hbyte++ )
+        {
+            int baseIndex = hbyte * TINYGLCD_SCREEN_WIDTH;
+            currentDrawBuffer[baseIndex + x] ^= 0xFF;
+        }
+        
+        mask = 0xFF >> (8 - lastBit);
+        currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + x] ^= (uint8_t) mask;
+    }
+    else
+    {
+        uint8_t mask = 0xFF << firstBit;
+        mask = mask >> (8 - lastBit);
+        currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + x] ^= (uint8_t) mask;
+    }
+}
+
+void tglcd_drawHorizontalLineXOR(int x, int y, int width)
+{
+    int byte = y >> 3;
+    int bit = y - (byte << 3);
+    uint8_t mask = 0x01 << bit;
+    
+    for (int i = x; i < x + width; i++)
+        currentDrawBuffer[byte * TINYGLCD_SCREEN_WIDTH + i] ^= (uint8_t) mask;
+}
 
 void tglcd_drawBoxWithBorder(int xPos, int yPos, int width, int height)
 {
-	if (xPos < 0)
-	{
-		width += xPos;
+    if (xPos < 0)
+    {
+        width += xPos;
 		xPos = 0;
 	}
 	if (yPos < 0)
