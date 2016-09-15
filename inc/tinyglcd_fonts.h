@@ -64,9 +64,6 @@ typedef struct {
 	const character_t* chars[128];
 } font_t;
 
-/** returns the width of a given text in a given font */
-int getTextWidth(char* string, font_t font);
-
 #ifdef __cplusplus
 }
 #endif

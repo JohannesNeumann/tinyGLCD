@@ -78,6 +78,19 @@ void tglcd_init()
     currentSendBuffer = bufferB;
 }
 
+
+int tglcd_getTextWidth(const font_t* font, const char* text)
+{
+    int textWidth = 0;
+    while (*text)
+    {
+        const character_t* ch = font->chars[*text & 0x7F];
+        textWidth += ch->width;
+        text++;
+    }
+    return textWidth;
+}
+
 void tglcd_clearScreen()
 {
     tglcd_clearBuffer(currentDrawBuffer);
@@ -222,14 +235,7 @@ int tglcd_drawTextXOR(int x, int y, const font_t* font, const char* text, int cl
 
 void tglcd_drawTextXCenteredOR(int x, int y, int width, const font_t* font, const char* text)
 {
-	int textWidth = 0;
-	const char* dummy = text;
-	while (*dummy)
-	{
-		const character_t* ch = font->chars[*dummy & 0x7F];
-		textWidth += ch->width;
-		dummy++;
-	}
+    int textWidth = tglcd_getTextWidth(font, text);
 
 	int offsetX = (width - textWidth) / 2;
 
@@ -244,15 +250,7 @@ void tglcd_drawTextXCenteredOR(int x, int y, int width, const font_t* font, cons
 
 void tglcd_drawTextXCenteredXOR(int x, int y, int width, const font_t* font, const char* text)
 {
-	int textWidth = 0;
-	const char* dummy = text;
-	while (*dummy)
-	{
-		const character_t* ch = font->chars[*dummy & 0x7F];
-		textWidth += ch->width;
-		dummy++;
-	}
-
+	int textWidth = tglcd_getTextWidth(font, text);
 	int offsetX = (width - textWidth) / 2;
 
 	while (*text)
@@ -266,15 +264,7 @@ void tglcd_drawTextXCenteredXOR(int x, int y, int width, const font_t* font, con
 
 void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const char* text)
 {
-	int textWidth = 0;
-	const char* dummy = text;
-	while (*dummy)
-	{
-		const character_t* ch = font->chars[*dummy & 0x7F];
-		textWidth += ch->width;
-		dummy++;
-	}
-
+    int textWidth = tglcd_getTextWidth(font, text);
 	int x = right - textWidth + 1;
 
 	while (*text)
@@ -288,16 +278,8 @@ void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const ch
 
 void tglcd_drawTextRightAlignedXOR(int right, int y, const font_t* font, const char* text)
 {
-	int textWidth = 0;
-	const char* dummy = text;
-	while (*dummy)
-	{
-		const character_t* ch = font->chars[*dummy & 0x7F];
-		textWidth += ch->width;
-		dummy++;
-	}
-
-	int x = right - textWidth + 1;
+	int textWidth = tglcd_getTextWidth(font, text);
+    int x = right - textWidth + 1;
 
 	while (*text)
 	{

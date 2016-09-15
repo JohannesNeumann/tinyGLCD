@@ -10,15 +10,11 @@
 extern "C" {
 #endif
     
-    /*typedef enum
-     {
-     or,
-     xor
-     } glcdStyle_t;*/
-    
     void tglcd_init();
     
     void tglcd_clearScreen();
+    
+    int tglcd_getTextWidth(const font_t* font, const char* text);
     
     // returns first x coordinate after the text
     int tglcd_drawTextOR(int x, int y, const font_t* font, const char* text, int clipToX, int clipToY);
@@ -103,6 +99,11 @@ public:
     void drawBoxWithBorder(int x = 0, int y = 0, int width = TINYGLCD_SCREEN_WIDTH, int height = TINYGLCD_SCREEN_HEIGHT)
     {
         tglcd_drawBoxWithBorder(x, y, width, height);
+    }
+    
+    int getTextWidth(const font_t* font, const char* text)
+    {
+        return tglcd_getTextWidth(font, text);
     }
     
     int drawTextOR(int x,
