@@ -233,7 +233,7 @@ int tglcd_drawTextXOR(int x, int y, const font_t* font, const char* text, int cl
 	return x;
 }
 
-void tglcd_drawTextXCenteredOR(int x, int y, int width, const font_t* font, const char* text)
+void tglcd_drawTextXCenteredOR(int x, int y, int width, const font_t* font, const char* text, int clipToY)
 {
     int textWidth = tglcd_getTextWidth(font, text);
 
@@ -242,13 +242,13 @@ void tglcd_drawTextXCenteredOR(int x, int y, int width, const font_t* font, cons
 	while (*text)
 	{
 		const character_t* ch = font->chars[*text & 0x7F];
-		tglcd_drawPixelbufferOR(x + offsetX, y, ch->pixeldata, ch->width, font->height, font->byteHeight, TINYGLCD_SCREEN_WIDTH, TINYGLCD_SCREEN_HEIGHT);
+		tglcd_drawPixelbufferOR(x + offsetX, y, ch->pixeldata, ch->width, font->height, font->byteHeight, x + width, clipToY);
 		x += ch->width;
 		text++;
 	}
 }
 
-void tglcd_drawTextXCenteredXOR(int x, int y, int width, const font_t* font, const char* text)
+void tglcd_drawTextXCenteredXOR(int x, int y, int width, const font_t* font, const char* text, int clipToY)
 {
 	int textWidth = tglcd_getTextWidth(font, text);
 	int offsetX = (width - textWidth) / 2;
@@ -256,13 +256,13 @@ void tglcd_drawTextXCenteredXOR(int x, int y, int width, const font_t* font, con
 	while (*text)
 	{
 		const character_t* ch = font->chars[*text & 0x7F];
-		tglcd_drawPixelbufferXOR(x + offsetX, y, ch->pixeldata, ch->width, font->height, font->byteHeight, TINYGLCD_SCREEN_WIDTH, TINYGLCD_SCREEN_HEIGHT);
+		tglcd_drawPixelbufferXOR(x + offsetX, y, ch->pixeldata, ch->width, font->height, font->byteHeight, x + width, clipToY);
 		x += ch->width;
 		text++;
 	}
 }
 
-void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const char* text)
+void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const char* text, int clipToY)
 {
     int textWidth = tglcd_getTextWidth(font, text);
 	int x = right - textWidth + 1;
@@ -270,13 +270,13 @@ void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const ch
 	while (*text)
 	{
 		const character_t* ch = font->chars[*text & 0x7F];
-		tglcd_drawPixelbufferOR(x, y, ch->pixeldata, ch->width, font->height, font->byteHeight, TINYGLCD_SCREEN_WIDTH, TINYGLCD_SCREEN_HEIGHT);
+		tglcd_drawPixelbufferOR(x, y, ch->pixeldata, ch->width, font->height, font->byteHeight, right, clipToY);
 		x += ch->width;
 		text++;
 	}
 }
 
-void tglcd_drawTextRightAlignedXOR(int right, int y, const font_t* font, const char* text)
+void tglcd_drawTextRightAlignedXOR(int right, int y, const font_t* font, const char* text, int clipToY)
 {
 	int textWidth = tglcd_getTextWidth(font, text);
     int x = right - textWidth + 1;
@@ -284,7 +284,7 @@ void tglcd_drawTextRightAlignedXOR(int right, int y, const font_t* font, const c
 	while (*text)
 	{
 		const character_t* ch = font->chars[*text & 0x7F];
-		tglcd_drawPixelbufferXOR(x, y, ch->pixeldata, ch->width, font->height, font->byteHeight, TINYGLCD_SCREEN_WIDTH, TINYGLCD_SCREEN_HEIGHT);
+		tglcd_drawPixelbufferXOR(x, y, ch->pixeldata, ch->width, font->height, font->byteHeight, right, clipToY);
 		x += ch->width;
 		text++;
 	}
@@ -883,7 +883,7 @@ void tglcd_drawIntOR(int x, int y, const font_t* font, int value, int alwaysIncl
 	tglcd_drawTextOR(x, y, font, buffer, clipToX, clipToY);
 }
 
-void tglcd_drawIntXCenteredXOR(int x, int y, int width, const font_t* font, int value, int alwaysIncludeSign)
+void tglcd_drawIntXCenteredXOR(int x, int y, int width, const font_t* font, int value, int clipToY, int alwaysIncludeSign)
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
@@ -891,10 +891,10 @@ void tglcd_drawIntXCenteredXOR(int x, int y, int width, const font_t* font, int 
 	else
 		itoa(value, buffer);
 
-	tglcd_drawTextXCenteredXOR(x, y, width, font, buffer);
+	tglcd_drawTextXCenteredXOR(x, y, width, font, buffer, clipToY);
 }
 
-void tglcd_drawIntXCenteredOR(int x, int y, int width, const font_t* font, int value, int alwaysIncludeSign)
+void tglcd_drawIntXCenteredOR(int x, int y, int width, const font_t* font, int value, int clipToY, int alwaysIncludeSign)
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
@@ -902,11 +902,11 @@ void tglcd_drawIntXCenteredOR(int x, int y, int width, const font_t* font, int v
 	else
 		itoa(value, buffer);
 
-	tglcd_drawTextXCenteredOR(x, y, width, font, buffer);
+	tglcd_drawTextXCenteredOR(x, y, width, font, buffer, clipToY);
 }
 
 
-void tglcd_drawIntRightAlignedOR(int right, int y, const font_t* font, int value, int alwaysIncludeSign)
+void tglcd_drawIntRightAlignedOR(int right, int y, const font_t* font, int value, int clipToY, int alwaysIncludeSign)
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
@@ -914,10 +914,10 @@ void tglcd_drawIntRightAlignedOR(int right, int y, const font_t* font, int value
 	else
 		itoa(value, buffer);
 
-	tglcd_drawTextRightAlignedOR(right, y, font, buffer);
+	tglcd_drawTextRightAlignedOR(right, y, font, buffer, clipToY);
 }
 
-void tglcd_drawIntRightAlignedXOR(int right, int y, const font_t* font, int value, int alwaysIncludeSign)
+void tglcd_drawIntRightAlignedXOR(int right, int y, const font_t* font, int value, int clipToY, int alwaysIncludeSign)
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
@@ -925,7 +925,7 @@ void tglcd_drawIntRightAlignedXOR(int right, int y, const font_t* font, int valu
 	else
 		itoa(value, buffer);
 
-	tglcd_drawTextRightAlignedXOR(right, y, font, buffer);
+	tglcd_drawTextRightAlignedXOR(right, y, font, buffer, clipToY);
 }
 
 void tglcd_swapBuffers()
