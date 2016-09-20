@@ -21,8 +21,8 @@ extern "C" {
     int tglcd_drawTextXOR(int x, int y, const font_t* font, const char* text, int clipToX, int clipToY);
     void tglcd_drawTextXCenteredOR(int x, int y, int width, const font_t* font, const char* text, int clipToY);
     void tglcd_drawTextXCenteredXOR(int x, int y, int width, const font_t* font, const char* text, int clipToY);
-    void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const char* text, int clipToY);
-    void tglcd_drawTextRightAlignedXOR(int right, int y, const font_t* font, const char* text, int clipToY);
+    void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const char* text, int maximumWidth, int clipToY);
+    void tglcd_drawTextRightAlignedXOR(int right, int y, const font_t* font, const char* text, int maximumWidth, int clipToY);
     // draws multiple lines of text. Line breaks are done on the \n character. if lineHeight == 0, the default height of the
     // font is used.
     void tglcd_drawMultiLineTextOR(int x, int y, int width, const font_t* font, const char* text, int clipToY, int lineHeight);
@@ -52,10 +52,12 @@ extern "C" {
     void tglcd_drawIntXOR(int x, int y, const font_t* font, int value, int alwaysIncludeSign, int clipToX, int clipToY);
     void tglcd_drawIntXCenteredXOR(int x, int y, int width, const font_t* font, int value, int clipToY, int alwaysIncludeSign);
     void tglcd_drawIntXCenteredOR(int x, int y, int width, const font_t* font, int value, int clipToY, int alwaysIncludeSign);
-    void tglcd_drawIntRightAlignedOR(int right, int y, const font_t* font, int value, int clipToY, int alwaysIncludeSign);
-    void tglcd_drawIntRightAlignedXOR(int right, int y, const font_t* font, int value, int clipToY, int alwaysIncludeSign);
+    void tglcd_drawIntRightAlignedOR(int right, int y, const font_t* font, int value, int maximumWidth, int clipToY, int alwaysIncludeSign);
+    void tglcd_drawIntRightAlignedXOR(int right, int y, const font_t* font, int value, int maximumWidth, int clipToY, int alwaysIncludeSign);
     
     void tglcd_setPixel(int x, int y, int shouldBeBlack);
+    
+    void tglcd_grayOutEntireScreen();
     
     void tglcd_loadWholeScreenFromBuffer(const uint8_t* pixeldata);
     
@@ -137,14 +139,18 @@ public:
         tglcd_drawTextXCenteredXOR(x, y, width, font, text, clipToY);
     }
     
-    void drawTextRightAlignedOR(int right, int y, const font_t* font, const char* text, int clipToY = TINYGLCD_SCREEN_HEIGHT)
+    void drawTextRightAlignedOR(int right, int y, const font_t* font, const char* text, int maximumWidth = 0, int clipToY = TINYGLCD_SCREEN_HEIGHT)
     {
-        tglcd_drawTextRightAlignedOR(right, y, font, text, clipToY);
+        if (maximumWidth == 0)
+            maximumWidth = right;
+        tglcd_drawTextRightAlignedOR(right, y, font, text, maximumWidth, clipToY);
     }
     
-    void drawTextRightAlignedXOR(int right, int y, const font_t* font, const char* text, int clipToY = TINYGLCD_SCREEN_HEIGHT)
+    void drawTextRightAlignedXOR(int right, int y, const font_t* font, const char* text, int maximumWidth = 0, int clipToY = TINYGLCD_SCREEN_HEIGHT)
     {
-        tglcd_drawTextRightAlignedXOR(right, y, font, text, clipToY);
+        if (maximumWidth == 0)
+            maximumWidth = right;
+        tglcd_drawTextRightAlignedXOR(right, y, font, text, maximumWidth, clipToY);
     }
     
     void drawMultiLineTextOR(int x,
@@ -256,20 +262,26 @@ public:
                                int y,
                                const font_t* font,
                                int value,
+                               int maximumWidth = 0,
                                int clipToY = TINYGLCD_SCREEN_HEIGHT,
                                bool alwaysIncludeSign = false)
     {
-        tglcd_drawIntRightAlignedOR(right, y, font, value, clipToY, alwaysIncludeSign?1:0);
+        if (maximumWidth == 0)
+            maximumWidth = right;
+        tglcd_drawIntRightAlignedOR(right, y, font, value, maximumWidth, clipToY, alwaysIncludeSign?1:0);
     }
     
     void drawIntRightAlignedXOR(int right,
                                 int y,
                                 const font_t* font,
                                 int value,
+                                int maximumWidth = 0,
                                 int clipToY = TINYGLCD_SCREEN_HEIGHT,
                                 bool alwaysIncludeSign = false)
     {
-        tglcd_drawIntRightAlignedXOR(right, y, font, value, clipToY, alwaysIncludeSign?1:0);
+        if (maximumWidth == 0)
+            maximumWidth = right;
+        tglcd_drawIntRightAlignedXOR(right, y, font, value, maximumWidth, clipToY, alwaysIncludeSign?1:0);
     }
     
     void drawDottedVerticalLineOR(int x, int y, int height)
@@ -310,6 +322,11 @@ public:
     void drawHorizontalLineXOR(int x, int y, int width)
     {
         tglcd_drawHorizontalLineXOR(x, y, width);
+    }
+    
+    void grayOutEntireScreen()
+    {
+        tglcd_grayOutEntireScreen();
     }
     
     

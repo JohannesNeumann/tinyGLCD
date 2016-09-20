@@ -262,9 +262,11 @@ void tglcd_drawTextXCenteredXOR(int x, int y, int width, const font_t* font, con
 	}
 }
 
-void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const char* text, int clipToY)
+void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const char* text, int maximumWidth, int clipToY)
 {
     int textWidth = tglcd_getTextWidth(font, text);
+    if (textWidth > maximumWidth)
+        textWidth = maximumWidth;
 	int x = right - textWidth + 1;
 
 	while (*text)
@@ -276,9 +278,11 @@ void tglcd_drawTextRightAlignedOR(int right, int y, const font_t* font, const ch
 	}
 }
 
-void tglcd_drawTextRightAlignedXOR(int right, int y, const font_t* font, const char* text, int clipToY)
+void tglcd_drawTextRightAlignedXOR(int right, int y, const font_t* font, const char* text, int maximumWidth, int clipToY)
 {
-	int textWidth = tglcd_getTextWidth(font, text);
+    int textWidth = tglcd_getTextWidth(font, text);
+    if (textWidth > maximumWidth)
+        textWidth = maximumWidth;
     int x = right - textWidth + 1;
 
 	while (*text)
@@ -906,7 +910,7 @@ void tglcd_drawIntXCenteredOR(int x, int y, int width, const font_t* font, int v
 }
 
 
-void tglcd_drawIntRightAlignedOR(int right, int y, const font_t* font, int value, int clipToY, int alwaysIncludeSign)
+void tglcd_drawIntRightAlignedOR(int right, int y, const font_t* font, int value, int maximumWidth, int clipToY, int alwaysIncludeSign)
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
@@ -914,10 +918,10 @@ void tglcd_drawIntRightAlignedOR(int right, int y, const font_t* font, int value
 	else
 		itoa(value, buffer);
 
-	tglcd_drawTextRightAlignedOR(right, y, font, buffer, clipToY);
+	tglcd_drawTextRightAlignedOR(right, y, font, buffer, maximumWidth, clipToY);
 }
 
-void tglcd_drawIntRightAlignedXOR(int right, int y, const font_t* font, int value, int clipToY, int alwaysIncludeSign)
+void tglcd_drawIntRightAlignedXOR(int right, int y, const font_t* font, int value, int maximumWidth, int clipToY, int alwaysIncludeSign)
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
@@ -925,7 +929,23 @@ void tglcd_drawIntRightAlignedXOR(int right, int y, const font_t* font, int valu
 	else
 		itoa(value, buffer);
 
-	tglcd_drawTextRightAlignedXOR(right, y, font, buffer, clipToY);
+	tglcd_drawTextRightAlignedXOR(right, y, font, buffer, maximumWidth, clipToY);
+}
+
+void tglcd_grayOutEntireScreen()
+{
+    uint8_t mask = 0b10101010;
+    for (int yByte = 0; yByte < TINYGLCD_BUFFER_HEIGHT; yByte++)
+    {
+        for (int xByte = 0; xByte < TINYGLCD_SCREEN_WIDTH; xByte++)
+        {
+            currentDrawBuffer[xByte + yByte * TINYGLCD_SCREEN_WIDTH] |= mask;
+            mask = ~mask;
+        }
+        // screen width is not an even number
+        if (TINYGLCD_SCREEN_WIDTH & 1)
+            mask = ~mask;
+    }
 }
 
 void tglcd_swapBuffers()
