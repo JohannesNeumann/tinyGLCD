@@ -710,7 +710,7 @@ void tglcd_drawDottedVerticalLineXOR(int x, int y, int height)
     }
 }
 
-void tglcd_drawDottedHorizontalLineSOR(int x, int y, int width)
+void tglcd_drawDottedHorizontalLineXOR(int x, int y, int width)
 {
     int byte = y >> 3;
     int bit = y - (byte << 3);
