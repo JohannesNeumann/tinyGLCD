@@ -64,6 +64,11 @@ extern "C" {
     void tglcd_swapBuffers();
     const uint8_t* tglcd_getCurrentDisplayBuffer();
     
+    /* itoa:  convert n to characters in s */
+    void tglcd_itoa(int n, char s[]);
+    /* itoa:  convert n to characters in s, always include sign */
+    void tglcd_itoaEnforceSign(int n, char s[]);
+    
 #ifdef __cplusplus
 }
 

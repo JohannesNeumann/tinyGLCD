@@ -26,7 +26,7 @@ void reverse(char s[])
 }
 
 /* itoa:  convert n to characters in s */
-void itoaEnforceSign(int n, char s[])
+void tglcd_itoaEnforceSign(int n, char s[])
 {
     int i, sign;
     
@@ -46,7 +46,7 @@ void itoaEnforceSign(int n, char s[])
 }
 
 /* itoa:  convert n to characters in s */
-void itoa(int n, char s[])
+void tglcd_itoa(int n, char s[])
 {
     int i, sign;
     
@@ -869,9 +869,9 @@ void tglcd_drawIntXOR(int x, int y, const font_t* font, int value, int alwaysInc
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
-		itoaEnforceSign(value, buffer);
+		tglcd_itoaEnforceSign(value, buffer);
 	else
-		itoa(value, buffer);
+		tglcd_itoa(value, buffer);
 
 	tglcd_drawTextXOR(x, y, font, buffer, clipToX, clipToY);
 }
@@ -880,9 +880,9 @@ void tglcd_drawIntOR(int x, int y, const font_t* font, int value, int alwaysIncl
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
-		itoaEnforceSign(value, buffer);
+		tglcd_itoaEnforceSign(value, buffer);
 	else
-		itoa(value, buffer);
+		tglcd_itoa(value, buffer);
 
 	tglcd_drawTextOR(x, y, font, buffer, clipToX, clipToY);
 }
@@ -891,9 +891,9 @@ void tglcd_drawIntXCenteredXOR(int x, int y, int width, const font_t* font, int 
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
-		itoaEnforceSign(value, buffer);
+		tglcd_itoaEnforceSign(value, buffer);
 	else
-		itoa(value, buffer);
+		tglcd_itoa(value, buffer);
 
 	tglcd_drawTextXCenteredXOR(x, y, width, font, buffer, clipToY);
 }
@@ -902,9 +902,9 @@ void tglcd_drawIntXCenteredOR(int x, int y, int width, const font_t* font, int v
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
-		itoaEnforceSign(value, buffer);
+		tglcd_itoaEnforceSign(value, buffer);
 	else
-		itoa(value, buffer);
+		tglcd_itoa(value, buffer);
 
 	tglcd_drawTextXCenteredOR(x, y, width, font, buffer, clipToY);
 }
@@ -914,9 +914,9 @@ void tglcd_drawIntRightAlignedOR(int right, int y, const font_t* font, int value
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
-		itoaEnforceSign(value, buffer);
+		tglcd_itoaEnforceSign(value, buffer);
 	else
-		itoa(value, buffer);
+		tglcd_itoa(value, buffer);
 
 	tglcd_drawTextRightAlignedOR(right, y, font, buffer, maximumWidth, clipToY);
 }
@@ -925,9 +925,9 @@ void tglcd_drawIntRightAlignedXOR(int right, int y, const font_t* font, int valu
 {
 	char buffer[6];
 	if (alwaysIncludeSign)
-		itoaEnforceSign(value, buffer);
+		tglcd_itoaEnforceSign(value, buffer);
 	else
-		itoa(value, buffer);
+		tglcd_itoa(value, buffer);
 
 	tglcd_drawTextRightAlignedXOR(right, y, font, buffer, maximumWidth, clipToY);
 }
