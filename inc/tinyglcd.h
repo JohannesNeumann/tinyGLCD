@@ -58,6 +58,7 @@ extern "C" {
     void tglcd_setPixel(int x, int y, int shouldBeBlack);
     
     void tglcd_grayOutEntireScreen();
+    void tglcd_grayOut(int x, int y, int width, int height);
     
     void tglcd_loadWholeScreenFromBuffer(const uint8_t* pixeldata);
     
@@ -332,6 +333,11 @@ public:
     void grayOutEntireScreen()
     {
         tglcd_grayOutEntireScreen();
+    }
+    
+    void grayOut(int x, int y, int width, int height)
+    {
+        tglcd_grayOut(x, y, width, height);
     }
     
     

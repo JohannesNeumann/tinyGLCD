@@ -948,6 +948,87 @@ void tglcd_grayOutEntireScreen()
     }
 }
 
+void tglcd_grayOut(int x, int y, int width, int height)
+{
+    if (x < 0)
+    {
+        width += x;
+        x = 0;
+    }
+    if (y < 0)
+    {
+        height += y;
+        y = 0;
+    }
+    int right = (x + width <= TINYGLCD_SCREEN_WIDTH)?(x + width):TINYGLCD_SCREEN_WIDTH;
+    int top = (y + height <= TINYGLCD_SCREEN_HEIGHT)?(y + height):TINYGLCD_SCREEN_HEIGHT;
+    
+    int firstByte = ( y ) >> 3;
+    int firstBit = y - (firstByte << 3);
+    int lastByte = ( top ) >> 3;
+    int lastBit = top - (lastByte << 3);
+    
+    if (firstByte != lastByte)
+    {
+        uint8_t mask = 0xFF << firstBit;
+        uint8_t grayMaskEven =   0b10101010 & mask;
+        uint8_t grayMaskUneven = 0b01010101 & mask;
+        uint8_t clearMask = ~mask;
+        
+        for ( int xI = x; xI < right; xI++ )
+        {
+            currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + xI] &= (uint8_t) clearMask;
+            if (x & 0x01)
+                currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + xI] |= (uint8_t) grayMaskUneven;
+            else
+                currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + xI] |= (uint8_t) grayMaskEven;
+        }
+        
+        for ( int hbyte = firstByte + 1; hbyte < lastByte; hbyte++ )
+        {
+            int baseIndex = hbyte * TINYGLCD_SCREEN_WIDTH;
+            for ( int xI = x; xI < right; xI++ )
+            {
+                if (x & 0x01)
+                    currentDrawBuffer[baseIndex * TINYGLCD_SCREEN_WIDTH + xI] |= (uint8_t) grayMaskUneven;
+                else
+                    currentDrawBuffer[baseIndex * TINYGLCD_SCREEN_WIDTH + xI] |= (uint8_t) grayMaskEven;
+            }
+        }
+        
+        mask = 0xFF >> (8 - lastBit);
+        grayMaskEven =   0b10101010 & mask;
+        grayMaskUneven = 0b01010101 & mask;
+        clearMask = ~mask;
+        
+        for ( int xI = x; xI < right; xI++ )
+        {
+            currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + xI] &= (uint8_t) clearMask;
+            if (x & 0x01)
+                currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + xI] |= (uint8_t) grayMaskUneven;
+            else
+                currentDrawBuffer[lastByte * TINYGLCD_SCREEN_WIDTH + xI] |= (uint8_t) grayMaskEven;
+        }
+    }
+    else
+    {
+        uint8_t mask = 0xFF << firstBit;
+        mask = mask >> (8 - lastBit);
+        uint8_t grayMaskEven =   0b10101010 & mask;
+        uint8_t grayMaskUneven = 0b01010101 & mask;
+        uint8_t clearMask = ~mask;
+        
+        for ( int xI = x; xI < right; xI++ )
+        {
+            currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + xI] &= (uint8_t) clearMask;
+            if (x & 0x01)
+                currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + xI] |= (uint8_t) grayMaskUneven;
+            else
+                currentDrawBuffer[firstByte * TINYGLCD_SCREEN_WIDTH + xI] |= (uint8_t) grayMaskEven;
+        }
+    }
+}
+
 void tglcd_swapBuffers()
 {
 	uint8_t* tmp = currentDrawBuffer;
